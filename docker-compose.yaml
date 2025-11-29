@@ -13,7 +13,7 @@ services:
       - npm_data:/data
       - npm_letsencrypt:/etc/letsencrypt
     networks:
-      - npm_network
+      - proxy
 
 volumes:
   npm_data:
@@ -23,4 +23,4 @@ volumes:
 
 networks:
   npm_network:
-    name: npm_network
+    name: proxy
