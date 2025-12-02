@@ -249,8 +249,6 @@ Consulta la [**Wiki del proyecto**](https://git.ictiberia.com/groales/npm/wiki) 
 
 - [Guía de Configuración](https://git.ictiberia.com/groales/npm/wiki/Configuracion)
 - [Certificados SSL/TLS](https://git.ictiberia.com/groales/npm/wiki/SSL)
-- [Backup y Restauración](https://git.ictiberia.com/groales/npm/wiki/Backup)
-- [Configuración Avanzada](https://git.ictiberia.com/groales/npm/wiki/Avanzado)
 
 ## Solución de problemas
 
