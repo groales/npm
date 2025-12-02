@@ -83,8 +83,8 @@ networks:
   - **Git Repository**:
     - Repository URL: `https://git.ictiberia.com/groales/npm`
     - Repository reference: `refs/heads/main`
-    - Compose path: `docker-compose.yaml`
-  - O **Web editor**: Pegar contenido de `docker-compose.yaml`
+    - Compose path: `docker-compose.yml`
+  - O **Web editor**: Pegar contenido de `docker-compose.yml`
 - **Deploy the stack**
 
 #### 4. Verificar despliegue
@@ -173,7 +173,7 @@ HTTPS_PORT=443
 ADMIN_PORT=81
 ```
 
-Luego modifica `docker-compose.yaml`:
+Luego modifica `docker-compose.yml`:
 
 ```yaml
 environment:
@@ -248,7 +248,7 @@ Get-NetTCPConnection -LocalPort 80
 # o en Linux
 sudo netstat -tulpn | grep :80
 
-# Cambiar puerto en docker-compose.yaml
+# Cambiar puerto en docker-compose.yml
 ports:
   - "8080:80"  # HTTP en puerto 8080
 ```
