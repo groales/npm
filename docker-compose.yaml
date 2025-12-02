@@ -23,4 +23,5 @@ volumes:
 
 networks:
   proxy:
-    external: true
+    name: proxy
+    driver: bridge

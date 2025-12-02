@@ -38,13 +38,7 @@ NGINX Proxy Manager es una herramienta de gestión de proxy inverso fácil de us
 
 ### Opción 1: Docker Compose (Línea de comandos)
 
-#### 1. Crear red proxy
-
-```bash
-docker network create proxy
-```
-
-#### 2. Clonar el repositorio
+#### 1. Clonar el repositorio
 
 ```bash
 git clone https://git.ictiberia.com/groales/npm
@@ -59,17 +53,9 @@ docker compose up -d
 
 ### Opción 2: Desplegar desde Portainer (Recomendado)
 
-#### 1. Crear red proxy
+#### 1. Red proxy
 
-Desde Portainer: **Networks** → **Add network**
-- **Name**: `proxy`
-- **Driver**: `bridge`
-- **Deploy**
-
-O desde línea de comandos:
-```bash
-docker network create proxy
-```
+La red `proxy` se creará automáticamente al desplegar el stack de NPM.
 
 #### 2. Conectar Portainer a la red proxy
 
@@ -226,7 +212,7 @@ networks:
   mi_red_interna:
     name: mi_red_interna
   proxy:
-    external: true  # Red creada previamente
+    external: true  # Red creada por NPM
 ```
 
 #### Configurar Proxy Host en NPM
