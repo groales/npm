@@ -111,6 +111,63 @@ Abre tu navegador en: **http://IP-del-servidor:81**
 
 🔐 **Importante**: Al primer login, se te pedirá cambiar estas credenciales inmediatamente.
 
+---
+
+## Despliegue con Docker CLI
+
+Si prefieres trabajar desde la línea de comandos:
+
+### 1. Clonar el repositorio
+
+```bash
+git clone https://git.ictiberia.com/groales/npm.git
+cd npm
+```
+
+### 2. Iniciar el servicio
+
+```bash
+docker compose up -d
+```
+
+NPM no requiere configuración de variables de entorno ni archivos override.
+
+La inicialización tarda **30-60 segundos** (MariaDB + NPM + migrations).
+
+### 3. Verificar el despliegue
+
+```bash
+# Ver logs en tiempo real
+docker compose logs -f npm
+
+# Verificar contenedores activos
+docker compose ps
+
+# Verificar base de datos
+docker compose exec npm-db mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "SHOW DATABASES;"
+```
+
+**Acceso**:
+- Interfaz web: `http://IP-del-servidor:81`
+- HTTP Proxy: Puerto `80`
+- HTTPS Proxy: Puerto `443`
+
+**Credenciales por defecto**:
+- Email: `admin@example.com`
+- Password: `changeme`
+
+⚠️ **IMPORTANTE**: Cambiar credenciales en primer login.
+
+### 4. Configuración de DNS
+
+Apuntar dominios al servidor NPM:
+```
+heimdall.example.com  → IP-del-servidor
+vaultwarden.example.com → IP-del-servidor
+```
+
+---
+
 ## Uso básico
 
 ### Crear un Proxy Host
