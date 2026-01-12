@@ -34,97 +34,18 @@ NGINX Proxy Manager es una herramienta de gestión de proxy inverso fácil de us
   - `npm_letsencrypt`: Certificados SSL de Let's Encrypt
 - **Red**: `proxy` (externa, compartida con otros servicios)
 
-## Pasos de despliegue
+## Despliegue
 
-### Opción 1: Docker Compose (Línea de comandos)
+### Opción 1: Docker CLI
 
 #### 1. Clonar el repositorio
-
-```bash
-git clone https://git.ictiberia.com/groales/npm
-cd npm
-```
-
-#### 3. Levantar el stack
-
-```bash
-docker compose up -d
-```
-
-### Opción 2: Desplegar desde Portainer (Recomendado)
-
-#### 1. Red proxy
-
-La red `proxy` se creará automáticamente al desplegar el stack de NPM.
-
-#### 2. Conectar Portainer a la red proxy
-
-**Containers** → `portainer` → **Duplicate/Edit**
-- En **Network** → **+ Connect to network** → Seleccionar `proxy`
-- **Deploy**
-
-O añadir a `docker-compose.override.yaml` de Portainer:
-```yaml
-services:
-  portainer:
-    networks:
-      - proxy
-
-networks:
-  proxy:
-    external: true
-```
-
-#### 3. Desplegar stack de NPM
-
-**Stacks** → **Add stack**
-- **Name**: `nginx-proxy-manager`
-- **Build method**: 
-  - **Git Repository**:
-    - Repository URL: `https://git.ictiberia.com/groales/npm`
-    - Repository reference: `refs/heads/main`
-    - Compose path: `docker-compose.yml`
-  - O **Web editor**: Pegar contenido de `docker-compose.yml`
-- **Deploy the stack**
-
-#### 4. Verificar despliegue
-
-**Stacks** → `nginx-proxy-manager` → Ver logs del contenedor
-
-### 3. Verificar el estado
-
-```bash
-docker ps --filter name=nginx-proxy-manager
-```
-
-### 4. Acceder a la interfaz de administración
-
-Abre tu navegador en: **http://IP-del-servidor:81**
-
-⏱️ **Primera vez**: El inicio puede tardar 1-2 minutos dependiendo del hardware.
-
-### 5. Login inicial
-
-**Credenciales por defecto**:
-- **Email**: `admin@example.com`
-- **Password**: `changeme`
-
-🔐 **Importante**: Al primer login, se te pedirá cambiar estas credenciales inmediatamente.
-
----
-
-## Despliegue con Docker CLI
-
-Si prefieres trabajar desde la línea de comandos:
-
-### 1. Clonar el repositorio
 
 ```bash
 git clone https://git.ictiberia.com/groales/npm.git
 cd npm
 ```
 
-### 2. Iniciar el servicio
+#### 2. Iniciar el servicio
 
 ```bash
 docker compose up -d
@@ -134,7 +55,7 @@ NPM no requiere configuración de variables de entorno ni archivos override.
 
 La inicialización tarda **30-60 segundos** (MariaDB + NPM + migrations).
 
-### 3. Verificar el despliegue
+#### 3. Verificar el despliegue
 
 ```bash
 # Ver logs en tiempo real
@@ -158,13 +79,29 @@ docker compose exec npm-db mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "SHOW DATABASE
 
 ⚠️ **IMPORTANTE**: Cambiar credenciales en primer login.
 
-### 4. Configuración de DNS
+#### 4. Configuración de DNS
 
 Apuntar dominios al servidor NPM:
 ```
-heimdall.example.com  → IP-del-servidor
+heimball.example.com  → IP-del-servidor
 vaultwarden.example.com → IP-del-servidor
 ```
+
+### Opción 2: Clonar Repositorio con Git
+
+Si prefieres trabajar con una copia local del repositorio:
+
+```bash
+git clone https://git.ictiberia.com/groales/npm.git
+cd npm
+docker compose up -d
+```
+
+### 3. Acceder a la interfaz de administración
+
+Abre tu navegador en: **http://IP-del-servidor:81**
+
+⏱️ **Primera vez**: El inicio puede tardar 1-2 minutos dependiendo del hardware.
 
 ---
 
@@ -187,32 +124,6 @@ vaultwarden.example.com → IP-del-servidor
 5. **Save**
 
 ✅ En pocos segundos tendrás un proxy HTTPS funcionando con certificado válido.
-
-### Ejemplo: Proxy a Portainer (Contenedores en Red Compartida)
-
-Si Portainer y NPM están en la misma red `proxy`:
-
-1. **Crear Proxy Host** en NPM:
-   - **Domain Names**: `portainer.tudominio.com`
-   - **Scheme**: `https` (Portainer usa HTTPS)
-   - **Forward Hostname/IP**: `portainer` (nombre del contenedor)
-   - **Forward Port**: `9443`
-   - **Cache Assets**: ❌
-   - **Block Common Exploits**: ✅
-   - **Websockets Support**: ✅ (necesario para Portainer)
-
-2. **Pestaña SSL**:
-   - ✅ **Request a new SSL Certificate**
-   - ✅ **Force SSL**
-   - ✅ **HTTP/2 Support**
-   - Email: `tu@email.com`
-   - ✅ **I Agree to Let's Encrypt ToS**
-
-3. **Save**
-
-Accede a: `https://portainer.tudominio.com` 🎉
-
-💡 **Ventaja**: No necesitas exponer el puerto 9443 de Portainer, NPM gestiona todo el tráfico HTTPS.
 
 ## Configuración avanzada
 
@@ -247,15 +158,7 @@ Este stack usa la red `proxy` (externa) para compartir conectividad con otros se
 
 #### Conectar otros servicios a la red proxy
 
-**Opción 1: Desde Portainer**
-
-Para cada stack/contenedor que quieras exponer via NPM:
-
-1. **Containers** → Seleccionar contenedor → **Duplicate/Edit**
-2. **Network** → **+ Connect to network** → `proxy`
-3. **Deploy**
-
-**Opción 2: En docker-compose.yaml**
+En `docker-compose.yml` de tus servicios:
 
 ```yaml
 services:
@@ -276,7 +179,7 @@ networks:
 
 Una vez el servicio esté en la red `proxy`:
 
-- **Forward Hostname**: Usar **nombre del contenedor** (ej: `portainer`, `jellyfin`, `nextcloud`)
+- **Forward Hostname**: Usar **nombre del contenedor** (ej: `jellyfin`, `nextcloud`, `gitea`)
 - **Forward Port**: Puerto **interno** del contenedor (no necesitas publicarlo con `-p`)
 
 **Ejemplo**: Si tienes Jellyfin corriendo:
