@@ -141,7 +141,7 @@ HTTPS_PORT=443
 ADMIN_PORT=81
 ```
 
-Luego modifica `docker-compose.yml`:
+Luego modifica `compose.yaml`:
 
 ```yaml
 environment:
@@ -158,7 +158,7 @@ Este stack usa la red `proxy` (externa) para compartir conectividad con otros se
 
 #### Conectar otros servicios a la red proxy
 
-En `docker-compose.yml` de tus servicios:
+En `compose.yaml` de tus servicios:
 
 ```yaml
 services:
@@ -208,7 +208,7 @@ Get-NetTCPConnection -LocalPort 80
 # o en Linux
 sudo netstat -tulpn | grep :80
 
-# Cambiar puerto en docker-compose.yml
+# Cambiar puerto en compose.yaml
 ports:
   - "8080:80"  # HTTP en puerto 8080
 ```
