@@ -2,118 +2,155 @@
 
 Servicio de proxy inverso con interfaz web para publicar aplicaciones internas con HTTPS.
 
-Referencia oficial: https://nginxproxymanager.com/
+Referencia oficial de instalación: https://nginxproxymanager.com/guide/
 
-## Caracteristicas
+## Características
 
-- Gestion web de hosts, redirecciones y reglas.
-- Emision de certificados SSL con Let's Encrypt.
+- Gestión web de hosts, redirecciones y reglas.
+- Emisión de certificados SSL con Let's Encrypt.
 - Panel administrativo en puerto dedicado.
-- Persistencia de configuracion y certificados en volumenes Docker.
+- Persistencia de configuración y certificados.
 
 ## Requisitos Previos
 
 - Docker Engine instalado.
 - Docker Compose instalado.
 - Puertos disponibles en el host: `80`, `81` y `443`.
-- DNS apuntando al servidor para emision de certificados.
-- Red Docker externa `proxy` creada en el host.
+- Red Docker externa `proxy` creada.
 
-## Archivos del Repositorio
+## Archivos de este Repositorio
 
-- `compose.yaml`
-- `README.md`
-- `data/` (se crea automaticamente al arrancar)
-- `letsencrypt/` (se crea automaticamente al arrancar)
+- `compose.yaml` - Definición del servicio.
+- `README.md` - Esta documentación.
+- `data/` - Persistencia de configuración (se crea al arrancar).
+- `letsencrypt/` - Certificados TLS (se crea al arrancar).
 
 ---
 
-## Despliegue
+## Despliegue con Docker Compose
 
-### 1. Levantar el servicio
+### 1. Clonar el repositorio
 
-Si no existe la red externa, creala primero:
+```bash
+git clone https://github.com/groales/npm.git
+cd npm
+```
+
+### 2. Revisar `compose.yaml`
+
+```yaml
+services:
+	app:
+		container_name: nginx-proxy-manager
+		image: jc21/nginx-proxy-manager:latest
+		restart: unless-stopped
+		environment:
+			TZ: "Europe/Madrid"
+		ports:
+			- "80:80"
+			- "81:81"
+			- "443:443"
+		volumes:
+			- ./data:/data
+			- ./letsencrypt:/etc/letsencrypt
+
+networks:
+	default:
+		external: true
+		name: proxy
+```
+
+### 3. Levantar el servicio
 
 ```bash
 docker network create proxy
-```
-
-Luego levanta el servicio:
-
-```bash
 docker compose up -d
 ```
 
-### 2. Verificar arranque
+## Método Alternativo: Crear Manualmente
 
-```bash
-docker compose ps
-docker compose logs -f app
-```
+Puedes copiar el `compose.yaml` en una carpeta nueva y ejecutar el mismo despliegue.
 
 ---
 
 ## Acceso Inicial
 
-- Panel de administracion: `http://IP_DEL_SERVIDOR:81`
+- Panel administrativo: `http://IP_DEL_SERVIDOR:81`
 - Entrada HTTP de proxys: puerto `80`
 - Entrada HTTPS de proxys: puerto `443`
 
-Credenciales iniciales:
+Credenciales por defecto:
 
 - Email: `admin@example.com`
 - Password: `changeme`
 
-Cambia estas credenciales en el primer inicio.
+Cámbialas en el primer inicio.
 
----
-
-## Uso Basico
-
-1. Inicia sesion en el panel.
-2. Crea un Proxy Host con tu dominio.
-3. Define el host y puerto interno del servicio destino.
-4. Solicita certificado SSL y activa redireccion a HTTPS.
-5. Guarda y valida acceso.
-
----
-
-## Comandos Utiles
+## Comandos Útiles
 
 ```bash
 docker compose logs -f app
 docker compose restart app
 docker compose pull
 docker compose up -d
+docker compose down
 ```
 
----
+## Estructura de Volúmenes
+
+```text
+Bind mounts:
+├── ./data -> /data
+└── ./letsencrypt -> /etc/letsencrypt
+```
+
+## Configuración Avanzada
+
+- Ajusta zona horaria con `TZ`.
+- Configura Proxy Hosts con certificados por dominio.
+- Puedes añadir Access Lists para restringir acceso por IP.
+
+## Solución de Problemas
+
+Si no emite certificados:
+
+- Verifica que el dominio resuelve al servidor.
+- Asegura exposición de puertos `80` y `443`.
+- Revisa logs con `docker compose logs -f app`.
 
 ## Seguridad
 
-1. Restringe el acceso al puerto administrativo `81`.
-2. Publica servicios solo por HTTPS.
-3. Habilita controles de acceso para aplicaciones sensibles.
-4. Realiza backup periodico de los volumenes de datos y certificados.
+- Restringe acceso al panel (`81`) por firewall.
+- Publica aplicaciones por HTTPS.
+- Usa contraseñas robustas y MFA si aplica.
 
-En esta configuracion, los datos persisten en carpetas locales:
+## Backup y Restauración
 
-- `./data`
-- `./letsencrypt`
+```bash
+# Backup
+tar -czf npm-backup-$(date +%Y%m%d).tar.gz ./data ./letsencrypt
 
----
+# Restauración
+docker compose down
+rm -rf ./data ./letsencrypt
+tar -xzf npm-backup-YYYYMMDD.tar.gz
+docker compose up -d
+```
+
+## Actualización
+
+```bash
+docker compose pull
+docker compose up -d
+docker compose logs -f app
+```
 
 ## Recursos
 
 - Sitio oficial: https://nginxproxymanager.com/
-- Repositorio: https://github.com/NginxProxyManager/nginx-proxy-manager
+- Repositorio oficial: https://github.com/NginxProxyManager/nginx-proxy-manager
 - Imagen Docker: https://hub.docker.com/r/jc21/nginx-proxy-manager
 
----
+## Licencia
 
-## Persistencia y Red
-
-- Persistencia mediante bind mounts locales:
-	- `./data:/data`
-	- `./letsencrypt:/etc/letsencrypt`
-- Red usada por el servicio: red externa `proxy`.
+Este repositorio de configuración es de uso libre. Revisa la licencia del proyecto original en su repositorio oficial.
