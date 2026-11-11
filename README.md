@@ -42,17 +42,82 @@ Si vas a usar la copia local ya creada, no hace falta clonar: entra en este dire
 ## Despliegue manual sin Git
 
 1. Instala Docker Engine con Compose v2.
-2. Copia `compose.yaml` y `.env.example` a una carpeta del anfitrión.
-3. Crea `.env` copiando `.env.example` y ajusta la zona horaria si es necesario.
-4. Crea la red externa una sola vez: `docker network create proxy` (si aún no existe).
-5. Desde esa carpeta, valida e inicia el servicio:
+2. Crea una carpeta para el proyecto y guarda estos dos archivos en ella.
+
+Contenido de `compose.yaml`:
+
+```yaml
+services:
+  app:
+    container_name: nginx-proxy-manager
+    image: jc21/nginx-proxy-manager:latest
+    restart: unless-stopped
+    environment:
+      - TZ=${TZ:-Europe/Madrid}
+    ports:
+      - "80:80"      # HTTP
+      - "81:81"      # Admin UI
+      - "443:443"    # HTTPS
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+
+networks:
+  default:
+    external: true
+    name: proxy
+```
+
+Contenido de `.env`:
+
+```dotenv
+# Zona horaria del contenedor, por ejemplo Europe/Madrid
+TZ=Europe/Madrid
+```
+
+3. Crea la red externa una sola vez: `docker network create proxy` (si aún no existe).
+4. Desde la carpeta del proyecto, valida e inicia el servicio:
 
 ```bash
 docker compose config --quiet
 docker compose up -d --pull always
 ```
 
-Compose crea automáticamente `data/` y `letsencrypt/` al iniciar, si no existen. En Windows PowerShell, el equivalente a `cp .env.example .env` es `Copy-Item .env.example .env`.
+Compose crea automáticamente `data/` y `letsencrypt/` al iniciar, si no existen. Ajusta `TZ` en `.env` si necesitas otra zona horaria.
+
+## Publicar servicios Docker mediante la red `proxy`
+
+Conecta Nginx Proxy Manager y cada servicio de destino a la red externa `proxy`. Así NPM puede resolver el nombre del servicio por DNS interno de Docker; no es necesario publicar en el anfitrión el puerto del servicio de destino.
+
+En el `compose.yaml` de cada aplicación, declara la red externa y asígnala al servicio:
+
+```yaml
+services:
+  web:
+    image: nginx:alpine
+    restart: unless-stopped
+    expose:
+      - "80"
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true
+    name: proxy
+```
+
+Usa el nombre real del servicio y el puerto donde escucha dentro del contenedor. `expose` es opcional para la conectividad entre contenedores; no publica el puerto en el anfitrión. No uses `localhost` como destino en NPM, porque dentro del contenedor apunta al propio NPM.
+
+Después de iniciar ambos proyectos, abre <http://localhost:81> y crea un **Proxy Host**:
+
+1. En **Domain Names**, escribe el dominio público y configura sus registros DNS para que apunten a la dirección del anfitrión.
+2. En **Forward Hostname / IP**, indica el nombre del servicio Compose conectado a `proxy` (en el ejemplo, `web`).
+3. En **Forward Port**, indica el puerto interno de la aplicación (en el ejemplo, `80`).
+4. Selecciona el esquema HTTP o HTTPS que realmente use el servicio de destino y guarda.
+5. Para TLS, abre la pestaña **SSL**, solicita o selecciona un certificado y activa **Force SSL** si corresponde. Para emitir certificados de Let's Encrypt, el dominio debe resolver públicamente al anfitrión y los puertos 80/443 deben ser accesibles desde Internet.
+
+Si NPM y la aplicación ya se ejecutan en proyectos Compose distintos, pueden compartir esta red siempre que ambos se conecten a la red externa `proxy`. Comprueba con `docker network inspect proxy` que los dos contenedores aparecen conectados.
 
 ## Variables de entorno
 
