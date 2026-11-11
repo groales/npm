@@ -1,0 +1,12 @@
+# Configuración local y secretos
+.env
+.secrets/
+
+# Estado y datos persistentes de Nginx Proxy Manager
+/data/
+/letsencrypt/
+
+# Archivos locales del sistema operativo
+.DS_Store
+Thumbs.db
+Desktop.ini
