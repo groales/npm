@@ -1,0 +1,19 @@
+services:
+  app:
+    container_name: nginx-proxy-manager
+    image: jc21/nginx-proxy-manager:latest
+    restart: unless-stopped
+    environment:
+      - TZ=${TZ:-Europe/Madrid}
+    ports:
+      - "80:80"      # HTTP
+      - "81:81"      # Admin UI
+      - "443:443"    # HTTPS
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+
+networks:
+  default:
+    external: true
+    name: proxy
