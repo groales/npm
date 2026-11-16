@@ -62,9 +62,11 @@ services:
     volumes:
       - ./data:/data
       - ./letsencrypt:/etc/letsencrypt
+    networks:
+      - proxy
 
 networks:
-  default:
+  proxy:
     external: true
     name: proxy
 ```
