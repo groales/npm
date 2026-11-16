@@ -28,9 +28,10 @@ La configuración mínima usa SQLite integrado y persiste los archivos bajo `./d
 Este directorio no configura ni publica un remoto. Después de publicar el repositorio en el servicio Git que elijas, sustituye la URL de ejemplo por la URL real:
 
 ```bash
-git clone <URL-del-repositorio> npm
+git clone https://github.com/groales/npm npm
 cd npm
 cp .env.example .env
+
 # Edita .env si necesitas cambiar la zona horaria
 docker network create proxy
 docker compose config --quiet
